@@ -43,6 +43,15 @@ datahub-frontend:
   existingGmsSecret:
     name: datahub-gms-secret
     key: datahub.gms.secret
+  extraVolumes:
+    - name: user-props
+      secret:
+        secretName: datahub-pass-secret
+  extraVolumeMounts:
+    - name: user-props
+      mountPath: /datahub-frontend/conf/user.props
+      subPath: token
+      readOnly: true
 
 acryl-datahub-actions:
   enabled: true
