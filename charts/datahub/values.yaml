@@ -5,6 +5,19 @@ datahub-gms:
   image:
     repository: linkedin/datahub-gms
     tag: "v0.8.27"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: eks.amazonaws.com/nodegroup
+                operator: In
+                values:
+                  - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 8Gi
 
 datahub-frontend:
   enabled: true
@@ -14,12 +27,28 @@ datahub-frontend:
   # Set up ingress to expose react front-end
   ingress:
     enabled: false
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: eks.amazonaws.com/nodegroup
+                operator: In
+                values:
+                  - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+  resources:
+    requests:
+      cpu: 250m
+      memory: 2Gi
+  existingGmsSecret:
+    name: datahub-gms-secret
+    key: datahub.gms.secret
 
 acryl-datahub-actions:
   enabled: true
   image:
     repository: public.ecr.aws/datahub/acryl-datahub-actions
-    tag: "v0.0.1-beta.11"
+    tag: "v0.0.1-beta.8"
   resources:
     limits:
       cpu: 500m
@@ -45,7 +74,7 @@ datahub-ingestion-cron:
     tag: "v0.8.27"
 
 elasticsearchSetupJob:
-  enabled: true
+  enabled: false
   image:
     repository: linkedin/datahub-elasticsearch-setup
     tag: "v0.8.27"
@@ -55,7 +84,7 @@ elasticsearchSetupJob:
     runAsUser: 1000
 
 kafkaSetupJob:
-  enabled: true
+  enabled: false
   image:
     repository: linkedin/datahub-kafka-setup
     tag: "v0.8.27"
@@ -65,7 +94,7 @@ kafkaSetupJob:
     runAsUser: 1000
 
 mysqlSetupJob:
-  enabled: true
+  enabled: false
   image:
     repository: acryldata/datahub-mysql-setup
     tag: "v0.8.27"
@@ -153,14 +182,14 @@ global:
       secretRef: "datahub-encryption-secrets"
       secretKey: "encryption_key_secret"
       # Set to false if you'd like to provide your own secret.
-      provisionSecret: true
+      provisionSecret: false
 
     managed_ingestion:
       enabled: true
       defaultCliVersion: "0.8.26.6"
 
     metadata_service_authentication:
-      enabled: false
+      enabled: true
       systemClientId: "__datahub_system"
       systemClientSecret:
         secretRef: "datahub-auth-secrets"
@@ -170,7 +199,7 @@ global:
           secretRef: "datahub-auth-secrets"
           secretKey: "token_service_signing_key"
       # Set to false if you'd like to provide your own auth secrets
-      provisionSecrets: true
+      provisionSecrets: false
 
 #  hostAliases:
 #    - ip: "192.168.0.104"
