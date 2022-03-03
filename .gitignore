@@ -1,3 +1,6 @@
 *.lock
 *.tgz
 .vscode
+.idea
+charts/datahub/secs.yaml
+charts/datahub/user.props
