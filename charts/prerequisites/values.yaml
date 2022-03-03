@@ -8,25 +8,32 @@ elasticsearch:
   # a master node when deploying on a single node Minikube / Kind / etc cluster.
   # antiAffinity: "soft"
 
-  # # Shrink default JVM heap.
-  # esJavaOpts: "-Xmx128m -Xms128m"
+  # Shrink default JVM heap.
+  esJavaOpts: "-Xmx14g -Xms14g"
 
-  # # Allocate smaller chunks of memory per pod.
-  # resources:
-  #   requests:
-  #     cpu: "100m"
-  #     memory: "512M"
-  #   limits:
-  #     cpu: "1000m"
-  #     memory: "512M"
+  # Allocate smaller chunks of memory per pod.
+  resources:
+    requests:
+      cpu: "2000m"
+      memory: "16Gi"
+    limits: ~
 
-  # # Request smaller persistent volumes.
-  # volumeClaimTemplate:
-  #   accessModes: ["ReadWriteOnce"]
-  #   storageClassName: "standard"
-  #   resources:
-  #     requests:
-  #       storage: 100M
+  # Request smaller persistent volumes.
+  volumeClaimTemplate:
+#    accessModes: ["ReadWriteOnce"]
+#    storageClassName: "standard"
+    resources:
+      requests:
+        storage: 100Gi
+
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: eks.amazonaws.com/nodegroup
+              operator: In
+              values:
+                - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
 
 # Official neo4j chart uses the Neo4j Enterprise Edition which requires a license
 neo4j:
@@ -46,12 +53,39 @@ neo4j-community:
   defaultDatabase: "graph.db"
   # For better security, add password to neo4j-secrets k8s secret and uncomment below
   existingPasswordSecret: neo4j-secrets
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: eks.amazonaws.com/nodegroup
+                operator: In
+                values:
+                  - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 8Gi
+  persistentVolume:
+    size: 100Gi
 
 mysql:
   enabled: true
   auth:
     # For better security, add mysql-secrets k8s secret with mysql-root-password, mysql-replication-password and mysql-password
     existingSecret: mysql-secrets
+  primary:
+    nodeAffinityPreset:
+      type: hard
+      key: eks.amazonaws.com/nodegroup
+      values:
+        - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+    resources:
+      requests:
+        cpu: 1000m
+        memory: 8Gi
+    persistence:
+      size: 100Gi
 
 cp-helm-charts:
   # Schema registry is under the community license
@@ -59,6 +93,13 @@ cp-helm-charts:
     enabled: true
     kafka:
       bootstrapServers: "prerequisites-kafka:9092"  # <<release-name>>-kafka:9092
+    heapOptions: "-Xms1024M -Xmx1024M"
+    nodeSelector:
+      eks.amazonaws.com/nodegroup: dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+    resources:
+      requests:
+        cpu: 666m
+        memory: 1.333Gi
   cp-kafka:
     enabled: false
   cp-zookeeper:
@@ -75,3 +116,29 @@ cp-helm-charts:
 # Bitnami version of Kafka that deploys open source Kafka https://artifacthub.io/packages/helm/bitnami/kafka
 kafka:
   enabled: true
+  nodeAffinityPreset:
+    type: hard
+    key: eks.amazonaws.com/nodegroup
+    values:
+      - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+  resources:
+    requests:
+      cpu: 500m
+      memory: 4Gi
+  persistence:
+    size: 100Gi
+  replicaCount: 3
+  heapOpts: -Xmx3072m -Xms3072m
+  podAntiAffinityPreset: hard
+  zookeeper:
+    nodeAffinityPreset:
+      type: hard
+      key: eks.amazonaws.com/nodegroup
+      values:
+        - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+    resources:
+      requests:
+        cpu: 666m
+        memory: 1.333Gi
+    persistence:
+      size: 100Gi
