@@ -55,6 +55,24 @@ datahub-frontend:
   service:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-ssl-cert: 'arn:aws:acm:ap-northeast-2:012481551608:certificate/ef2e4fdd-4b9b-4dca-975e-b4eef047ee79'
+  extraEnvs:
+    - name: AUTH_OIDC_ENABLED
+      value: "true"
+    - name: AUTH_OIDC_CLIENT_ID
+      value: '716819246145-c2u9qnluce2vajoc8fvpcbetiaa5lea6.apps.googleusercontent.com'
+    - name: AUTH_OIDC_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: datahub-oidc-secret
+          key: secret
+    - name: AUTH_OIDC_DISCOVERY_URI
+      value: 'https://accounts.google.com/.well-known/openid-configuration'
+    - name: AUTH_OIDC_BASE_URL
+      value: 'https://datahub.dp.sendbird.com:9002'
+    - name: AUTH_OIDC_USER_NAME_CLAIM
+      value: email
+    - name: AUTH_OIDC_SCOPE
+      value: 'openid profile email'
 
 acryl-datahub-actions:
   enabled: true
