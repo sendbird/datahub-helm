@@ -4,3 +4,4 @@
 .idea
 charts/datahub/secs.yaml
 charts/datahub/user.props
+charts/datahub/oidc-secret.yaml
