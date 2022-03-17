@@ -4,6 +4,10 @@ elasticsearch:
   image: "314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell"
   imageTag: "elas-s3-7.16.2"
 
+  keystore:
+    - secretName: s3-access-key
+    - secretName: s3-secret-key
+
   enabled: true   # set this to false, if you want to provide your own ES instance.
   replicas: 3
   minimumMasterNodes: 1
