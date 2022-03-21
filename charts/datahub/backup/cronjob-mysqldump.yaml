@@ -1,0 +1,40 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: dh-mysql-backup
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: airflow-worker
+          nodeSelector:
+            eks.amazonaws.com/nodegroup: dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+          containers:
+            - name: dh-mysql-backup
+              image: 314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell:datahub-mysqldump
+              resources:
+                requests:
+                  memory: 2Gi
+              env:
+                - name: MYSQL_PWD
+                  valueFrom:
+                    secretKeyRef:
+                      name: mysql-secrets
+                      key: mysql-root-password
+                - name: SVC_MYSQL
+                  value: prerequisites-mysql
+                - name: DB_NAME
+                  value: datahub
+                - name: TABLE_NAME
+                  value: metadata_aspect_v2
+                - name: S3_BUCKET
+                  value: s3://dataplatform-apne2-airflow-local-prod-log/dh-mysql-snapshot
+              args:
+                - /bin/sh
+                - -c
+                - NOW=$(date "+%Y-%m-%dT%H-%M-%S");
+                  mysqldump -h ${SVC_MYSQL} ${DB_NAME} ${TABLE_NAME} > dump_${NOW}.sql;
+                  aws s3 cp dump_${NOW}.sql ${S3_BUCKET}/;
