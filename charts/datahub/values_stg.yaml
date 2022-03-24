@@ -1,5 +1,5 @@
 # used as global variables
-myNodeGroup: &default-node-group "staging-node-group"
+myNodeGroup: &default-node-group "dataplatform-apne2-airflow-local-stg-datahub_nodegroup"
 
 
 datahub-gms:
@@ -30,7 +30,7 @@ datahub-frontend:
     - name: AUTH_OIDC_ENABLED
       value: "true"
     - name: AUTH_OIDC_CLIENT_ID
-      value: ''
+      value: '716819246145-c2u9qnluce2vajoc8fvpcbetiaa5lea6.apps.googleusercontent.com'
     - name: AUTH_OIDC_CLIENT_SECRET
       valueFrom:
         secretKeyRef:
@@ -39,7 +39,7 @@ datahub-frontend:
     - name: AUTH_OIDC_DISCOVERY_URI
       value: 'https://accounts.google.com/.well-known/openid-configuration'
     - name: AUTH_OIDC_BASE_URL
-      value: 'https://datahub.dp.sendbird.com:9002'
+      value: 'https://datahub.dp-stg.sendbirdtest.com:9002'
     - name: AUTH_OIDC_USER_NAME_CLAIM
       value: email
     - name: AUTH_OIDC_SCOPE
