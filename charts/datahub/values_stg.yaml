@@ -25,7 +25,7 @@ datahub-frontend:
                   - *default-node-group
   service:
     annotations:
-      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: ''
+      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: 'arn:aws:acm:ap-northeast-2:232797014574:certificate/a74d9ef9-f4f2-4ebf-b6ee-04d42929b1ac'
   extraEnvs:
     - name: AUTH_OIDC_ENABLED
       value: "true"
