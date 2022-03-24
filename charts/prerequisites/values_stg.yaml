@@ -1,0 +1,44 @@
+# used as global variables
+myNodeGroup: &default-node-group "staging-node-group"
+
+
+elasticsearch:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: eks.amazonaws.com/nodegroup
+              operator: In
+              values:
+                - *default-node-group
+
+neo4j-community:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: eks.amazonaws.com/nodegroup
+                operator: In
+                values:
+                  - *default-node-group
+
+mysql:
+  primary:
+    nodeAffinityPreset:
+      values:
+        - *default-node-group
+
+cp-helm-charts:
+  cp-schema-registry:
+    nodeSelector:
+      eks.amazonaws.com/nodegroup: *default-node-group
+
+kafka:
+  nodeAffinityPreset:
+    values:
+      - *default-node-group
+  zookeeper:
+    nodeAffinityPreset:
+      values:
+        - *default-node-group

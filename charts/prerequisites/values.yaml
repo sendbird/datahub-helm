@@ -1,3 +1,7 @@
+# used as global variables
+myNodeGroup: &default-node-group "dataplatform-apne2-airflow-local-prod-datahub_nodegroup"
+
+
 # Default configuration for pre-requisites to get you started
 # Copy this file and update to the configuration of choice
 elasticsearch:
@@ -40,7 +44,7 @@ elasticsearch:
             - key: eks.amazonaws.com/nodegroup
               operator: In
               values:
-                - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+                - *default-node-group
 
 # Official neo4j chart uses the Neo4j Enterprise Edition which requires a license
 neo4j:
@@ -68,7 +72,7 @@ neo4j-community:
               - key: eks.amazonaws.com/nodegroup
                 operator: In
                 values:
-                  - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+                  - *default-node-group
   resources:
     requests:
       cpu: 1000m
@@ -86,7 +90,7 @@ mysql:
       type: hard
       key: eks.amazonaws.com/nodegroup
       values:
-        - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+        - *default-node-group
     resources:
       requests:
         cpu: 1000m
@@ -102,7 +106,7 @@ cp-helm-charts:
       bootstrapServers: "prerequisites-kafka:9092"  # <<release-name>>-kafka:9092
     heapOptions: "-Xms1024M -Xmx1024M"
     nodeSelector:
-      eks.amazonaws.com/nodegroup: dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+      eks.amazonaws.com/nodegroup: *default-node-group
     resources:
       requests:
         cpu: 666m
@@ -127,7 +131,7 @@ kafka:
     type: hard
     key: eks.amazonaws.com/nodegroup
     values:
-      - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+      - *default-node-group
   resources:
     requests:
       cpu: 500m
@@ -142,7 +146,7 @@ kafka:
       type: hard
       key: eks.amazonaws.com/nodegroup
       values:
-        - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+        - *default-node-group
     resources:
       requests:
         cpu: 666m
