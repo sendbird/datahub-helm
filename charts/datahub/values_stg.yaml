@@ -1,0 +1,46 @@
+# used as global variables
+myNodeGroup: &default-node-group "staging-node-group"
+
+
+datahub-gms:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: eks.amazonaws.com/nodegroup
+                operator: In
+                values:
+                  - *default-node-group
+
+datahub-frontend:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: eks.amazonaws.com/nodegroup
+                operator: In
+                values:
+                  - *default-node-group
+  service:
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: ''
+  extraEnvs:
+    - name: AUTH_OIDC_ENABLED
+      value: "true"
+    - name: AUTH_OIDC_CLIENT_ID
+      value: ''
+    - name: AUTH_OIDC_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: datahub-oidc-secret
+          key: secret
+    - name: AUTH_OIDC_DISCOVERY_URI
+      value: 'https://accounts.google.com/.well-known/openid-configuration'
+    - name: AUTH_OIDC_BASE_URL
+      value: 'https://datahub.dp.sendbird.com:9002'
+    - name: AUTH_OIDC_USER_NAME_CLAIM
+      value: email
+    - name: AUTH_OIDC_SCOPE
+      value: 'openid profile email'

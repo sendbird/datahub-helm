@@ -1,3 +1,7 @@
+# used as global variables
+myNodeGroup: &default-node-group "dataplatform-apne2-airflow-local-prod-datahub_nodegroup"
+
+
 # Values to start up datahub after starting up the datahub-prerequisites chart with "prerequisites" release name
 # Copy this chart and change configuration as needed.
 datahub-gms:
@@ -13,7 +17,7 @@ datahub-gms:
               - key: eks.amazonaws.com/nodegroup
                 operator: In
                 values:
-                  - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+                  - *default-node-group
   resources:
     requests:
       cpu: 1000m
@@ -35,7 +39,7 @@ datahub-frontend:
               - key: eks.amazonaws.com/nodegroup
                 operator: In
                 values:
-                  - dataplatform-apne2-airflow-local-prod-datahub_nodegroup
+                  - *default-node-group
   resources:
     requests:
       cpu: 250m
