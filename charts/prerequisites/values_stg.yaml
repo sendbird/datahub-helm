@@ -3,7 +3,7 @@ myNodeGroup: &default-node-group "dataplatform-apne2-airflow-local-stg-datahub_n
 
 
 elasticsearch:
-  replicas: 1
+  replicas: 2
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
