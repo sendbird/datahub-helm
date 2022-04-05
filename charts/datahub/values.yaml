@@ -57,6 +57,8 @@ datahub-frontend:
       subPath: token
       readOnly: true
   service:
+    port: 443
+    targetPort: 9002
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-ssl-cert: 'arn:aws:acm:ap-northeast-2:012481551608:certificate/ef2e4fdd-4b9b-4dca-975e-b4eef047ee79'
   extraEnvs:
