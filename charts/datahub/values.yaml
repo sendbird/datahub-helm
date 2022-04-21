@@ -8,7 +8,7 @@ datahub-gms:
   enabled: true
   image:
     repository: linkedin/datahub-gms
-    tag: "v0.8.32"
+    tag: "v0.8.33"
 
   affinity:
     nodeAffinity:
@@ -28,7 +28,7 @@ datahub-frontend:
   enabled: true
   image:
     repository: linkedin/datahub-frontend-react
-    tag: "v0.8.32"
+    tag: "v0.8.33"
   # Set up ingress to expose react front-end
   ingress:
     enabled: false
@@ -97,24 +97,24 @@ acryl-datahub-actions:
 datahub-mae-consumer:
   image:
     repository: linkedin/datahub-mae-consumer
-    tag: "v0.8.32"
+    tag: "v0.8.33"
 
 datahub-mce-consumer:
   image:
     repository: linkedin/datahub-mce-consumer
-    tag: "v0.8.32"
+    tag: "v0.8.33"
 
 datahub-ingestion-cron:
   enabled: false
   image:
     repository: acryldata/datahub-ingestion
-    tag: "v0.8.32"
+    tag: "v0.8.33"
 
 elasticsearchSetupJob:
   enabled: false
   image:
     repository: linkedin/datahub-elasticsearch-setup
-    tag: "v0.8.32"
+    tag: "v0.8.33"
   podSecurityContext:
     fsGroup: 1000
   securityContext:
@@ -124,7 +124,7 @@ kafkaSetupJob:
   enabled: false
   image:
     repository: linkedin/datahub-kafka-setup
-    tag: "v0.8.32"
+    tag: "v0.8.33"
   podSecurityContext:
     fsGroup: 1000
   securityContext:
@@ -134,7 +134,7 @@ mysqlSetupJob:
   enabled: false
   image:
     repository: acryldata/datahub-mysql-setup
-    tag: "v0.8.32"
+    tag: "v0.8.33"
   podSecurityContext:
     fsGroup: 1000
   securityContext:
@@ -144,7 +144,7 @@ postgresqlSetupJob:
   enabled: false
   image:
     repository: acryldata/datahub-postgres-setup
-    tag: "v0.8.32"
+    tag: "v0.8.33"
   podSecurityContext:
     fsGroup: 1000
   securityContext:
@@ -154,7 +154,7 @@ datahubUpgrade:
   enabled: true
   image:
     repository: acryldata/datahub-upgrade
-    tag: "v0.8.32.1"
+    tag: "v0.8.33"
   noCodeDataMigration:
     sqlDbType: "MYSQL"
   podSecurityContext: {}
@@ -223,7 +223,7 @@ global:
 
     managed_ingestion:
       enabled: true
-      defaultCliVersion: "0.8.32"
+      defaultCliVersion: "0.8.33"
 
     metadata_service_authentication:
       enabled: true
