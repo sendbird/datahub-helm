@@ -66,20 +66,18 @@ datahub-frontend:
     - name: AUTH_OIDC_ENABLED
       value: "true"
     - name: AUTH_OIDC_CLIENT_ID
-      value: '716819246145-c2u9qnluce2vajoc8fvpcbetiaa5lea6.apps.googleusercontent.com'
+      value: '0oa6zonsuos9Z8s3x4x7'
     - name: AUTH_OIDC_CLIENT_SECRET
       valueFrom:
         secretKeyRef:
-          name: datahub-oidc-secret
+          name: datahub-okta-oidc-secret
           key: secret
     - name: AUTH_OIDC_DISCOVERY_URI
-      value: 'https://accounts.google.com/.well-known/openid-configuration'
+      value: 'https://sendbird.okta.com/.well-known/openid-configuration'
     - name: AUTH_OIDC_BASE_URL
       value: 'https://datahub.dp.sendbird.com'
-    - name: AUTH_OIDC_USER_NAME_CLAIM
-      value: email
     - name: AUTH_OIDC_SCOPE
-      value: 'openid profile email'
+      value: 'openid profile email groups'
 
 acryl-datahub-actions:
   enabled: true
