@@ -99,7 +99,7 @@ mysql:
         cpu: 1000m
         memory: 8Gi
     persistence:
-      size: 100Gi
+      size: 300Gi
 
 cp-helm-charts:
   # Schema registry is under the community license

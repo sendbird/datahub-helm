@@ -29,6 +29,8 @@ mysql:
     nodeAffinityPreset:
       values:
         - *default-node-group
+    persistence:
+      size: 100Gi
 
 cp-helm-charts:
   cp-schema-registry:
