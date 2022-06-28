@@ -53,6 +53,11 @@ spec:
               containerPort: 9093
               protocol: TCP
           env:
+            - name: DATAHUB_GMS_HOST
+              value: {{ printf "%s-%s" .Release.Name "datahub-gms" }}
+            - name: DATAHUB_GMS_PORT
+              value: "{{ .Values.global.datahub.gms.port }}"
+            # Deprecated in favour of DATAHUB_* variables
             - name: GMS_HOST
               value: {{ printf "%s-%s" .Release.Name "datahub-gms" }}
             - name: GMS_PORT
@@ -63,12 +68,10 @@ spec:
               value: "{{ .Values.global.kafka.schemaregistry.url }}"
             - name: KAFKA_AUTO_OFFSET_POLICY
               value: "{{ .Values.actions.kafkaAutoOffsetPolicy }}"
-            - name: ACTION_FILE_NAME
-              value: "{{ .Values.actionFileName }}"
             {{- if .Values.global.springKafkaConfigurationOverrides }}
             {{- range $configName, $configValue := .Values.global.springKafkaConfigurationOverrides }}
             - name: KAFKA_PROPERTIES_{{ $configName | replace "." "_" | upper }}
-              value: {{ $configValue }}
+              value: {{ $configValue | quote }}
             {{- end }}
             {{- end }}
             {{- if .Values.global.credentialsAndCertsSecrets }}

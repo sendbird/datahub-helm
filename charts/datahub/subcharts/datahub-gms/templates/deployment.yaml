@@ -61,7 +61,7 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
-          {{- if .Values.global.datahub.monitoring.enablePrometheus }}
+          {{- if or .Values.global.datahub.monitoring.enablePrometheus .Values.global.datahub.monitoring.enableJMXPort }}
             - name: jmx
               containerPort: 4318
               protocol: TCP
@@ -89,6 +89,8 @@ spec:
             - name: MCE_CONSUMER_ENABLED
               value: "true"
             - name: MAE_CONSUMER_ENABLED
+              value: "true"
+            - name: PE_CONSUMER_ENABLED
               value: "true"
             {{- end }}
             - name: ENTITY_REGISTRY_CONFIG_PATH
@@ -165,7 +167,7 @@ spec:
             {{- if .Values.global.springKafkaConfigurationOverrides }}
             {{- range $configName, $configValue := .Values.global.springKafkaConfigurationOverrides }}
             - name: SPRING_KAFKA_PROPERTIES_{{ $configName | replace "." "_" | upper }}
-              value: {{ $configValue }}
+              value: {{ $configValue | quote }}
             {{- end }}
             {{- end }}
             {{- if .Values.global.credentialsAndCertsSecrets }}
@@ -185,6 +187,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.global.datahub.metadata_service_authentication.tokenService.signingKey.secretRef }}
                   key: {{ .Values.global.datahub.metadata_service_authentication.tokenService.signingKey.secretKey }}
+            - name: DATAHUB_TOKEN_SERVICE_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.datahub.metadata_service_authentication.tokenService.salt.secretRef }}
+                  key: {{ .Values.global.datahub.metadata_service_authentication.tokenService.salt.secretKey }}
             - name: DATAHUB_SYSTEM_CLIENT_ID
               value: {{ .Values.global.datahub.metadata_service_authentication.systemClientId }}
             - name: DATAHUB_SYSTEM_CLIENT_SECRET
