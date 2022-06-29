@@ -62,6 +62,12 @@ datahub-frontend:
     targetPort: 9002
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-ssl-cert: 'arn:aws:acm:ap-northeast-2:012481551608:certificate/ef2e4fdd-4b9b-4dca-975e-b4eef047ee79'
+    spec:
+      loadBalancerSourceRanges:
+        - "54.248.189.144/32"
+        - "44.235.162.182/32"
+        - "54.95.103.98/32"
+        - "54.203.219.6/32"
   extraEnvs:
     - name: AUTH_OIDC_ENABLED
       value: "true"

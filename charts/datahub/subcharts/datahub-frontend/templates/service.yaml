@@ -22,3 +22,7 @@ spec:
       {{- end }}
   selector:
     {{- include "datahub-frontend.selectorLabels" . | nindent 4 }}
+  {{- with .Values.service.spec.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
