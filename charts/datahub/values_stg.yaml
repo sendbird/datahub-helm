@@ -29,6 +29,8 @@ datahub-frontend:
   extraEnvs:
     - name: AUTH_OIDC_ENABLED
       value: "true"
+    - name: AUTH_OIDC_EXTRACT_GROUPS_ENABLED
+      value: "true"
     - name: AUTH_OIDC_CLIENT_ID
       value: '0oa6zopvrenQfunXG4x7'
     - name: AUTH_OIDC_CLIENT_SECRET
