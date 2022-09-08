@@ -93,11 +93,16 @@ acryl-datahub-actions:
     repository: acryldata/datahub-actions
     tag: "v0.0.4"
   resources:
-    limits:
-      memory: 512Mi
     requests:
       cpu: 300m
       memory: 256Mi
+  extraEnvs:
+    - name: PYTHONPATH
+      value: /etc/datahub
+    - name : GMS_ENDPOINT
+      value: 'http://datahub-gms.dp.sendbird.com:8080'
+    - name: ENV
+      value: prod
 
 datahub-mae-consumer:
   image:

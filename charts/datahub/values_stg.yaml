@@ -44,3 +44,15 @@ datahub-frontend:
       value: 'https://datahub.dp-stg.sendbirdtest.com'
     - name: AUTH_OIDC_SCOPE
       value: 'openid profile email groups'
+
+acryl-datahub-actions:
+  image:
+    repository: 314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell
+    tag: "custom-datahub-actions-v0.0.6-stg-3"
+  extraEnvs:
+    - name: PYTHONPATH
+      value: /etc/datahub
+    - name: GMS_ENDPOINT
+      value: 'http://datahub-gms.dp-stg.sendbirdtest.com:8080'
+    - name: ENV
+      value: stg
