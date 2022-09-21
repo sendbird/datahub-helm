@@ -101,9 +101,10 @@ class MirrorAction(Action):
     json_aspect_val = json.loads(aspect_val)
     logger.info(f'json_aspect_val: {json_aspect_val}')
 
-    table_name = self.table_name_template.replace(
-        '{env}', ENV.lower()).replace('{sendbird_region}',
-                                      self.source_sb_region)
+    table_name = self.table_name_template.replace('{env}',
+                                                  ENV.lower()).replace(
+                                                      '{sendbird_region}',
+                                                      self.source_sb_region)
     built_dataset_urn_regexp = f'urn:li:dataset:\(urn:li:dataPlatform:{self.platform},{table_name},{ENV.upper()}\)'
 
     if not re.search(built_dataset_urn_regexp, ev.entityUrn):
@@ -115,8 +116,7 @@ class MirrorAction(Action):
           ev.entityUrn,
           target_sb_region,
           self.sb_region_index_from_name,
-          is_elasticsearch=True
-          if self.platform == 'elasticsearch' else False)
+          is_elasticsearch=True if self.platform == 'elasticsearch' else False)
       logger.info(f'targetEntityUrn: {targetEntityUrn}')
       if ev.aspectName == 'editableDatasetProperties':
         # table level description
@@ -134,8 +134,7 @@ class MirrorAction(Action):
                 lastModified=AuditStampClass(
                     time=json_aspect_val['lastModified']['time'],
                     actor=json_aspect_val['lastModified']['actor'])
-                if json_aspect_val.get('lastModified') is not None else
-                None,
+                if json_aspect_val.get('lastModified') is not None else None,
             ),
         )
         logger.info(mcpw)
@@ -157,8 +156,7 @@ class MirrorAction(Action):
               EditableSchemaFieldInfoClass(
                   fieldPath=fieldPath,
                   description=description,
-                  globalTags=GlobalTagsClass(
-                      tags=tagAssociationClassList)
+                  globalTags=GlobalTagsClass(tags=tagAssociationClassList)
                   if tagAssociationClassList else None,
               ))
         mcpw: MetadataChangeProposalWrapper = MetadataChangeProposalWrapper(
@@ -167,8 +165,7 @@ class MirrorAction(Action):
             entityUrn=targetEntityUrn,
             aspectName='editableSchemaMetadata',
             aspect=EditableSchemaMetadataClass(
-                editableSchemaFieldInfo=editableSchemaFieldInfoClassList,
-            ),
+                editableSchemaFieldInfo=editableSchemaFieldInfoClassList, ),
         )
         logger.info(mcpw)
         graph.emit(mcpw)
@@ -196,8 +193,7 @@ class MirrorAction(Action):
                 lastModified=AuditStampClass(
                     time=json_aspect_val['lastModified']['time'],
                     actor=json_aspect_val['lastModified']['actor'])
-                if json_aspect_val.get('lastModified') is not None else
-                None,
+                if json_aspect_val.get('lastModified') is not None else None,
             ),
         )
         logger.info(mcpw)
