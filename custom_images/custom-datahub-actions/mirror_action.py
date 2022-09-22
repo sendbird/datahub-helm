@@ -87,6 +87,107 @@ class MirrorAction(Action):
     self.ctx = ctx
     logger.info(self.target_sb_regions)
 
+  def metadata_change_editableDatasetProperties_for(self, targetEntityUrn: str,
+                                                    json_aspect_val: dict):
+    # table level description
+    mcpw: MetadataChangeProposalWrapper = MetadataChangeProposalWrapper(
+        entityType='dataset',
+        changeType=ChangeTypeClass.UPSERT,
+        entityUrn=targetEntityUrn,
+        aspectName='editableDatasetProperties',
+        aspect=EditableDatasetPropertiesClass(
+            description=json_aspect_val['description'],
+            created=AuditStampClass(time=json_aspect_val['created']['time'],
+                                    actor=json_aspect_val['created']['actor'])
+            if json_aspect_val.get('created') is not None else None,
+            lastModified=AuditStampClass(
+                time=json_aspect_val['lastModified']['time'],
+                actor=json_aspect_val['lastModified']['actor'])
+            if json_aspect_val.get('lastModified') is not None else None,
+        ),
+    )
+    logger.info(mcpw)
+    graph.emit(mcpw)
+
+  def metadata_change_editableSchemaMetadata_for(self, targetEntityUrn: str,
+                                                 json_aspect_val: dict):
+    # column level description/tags
+    editableSchemaFieldInfoClassList = []
+    for each in json_aspect_val['editableSchemaFieldInfo']:
+      fieldPath = each.get('fieldPath')
+      description = each.get('description')
+      globalTags = each.get('globalTags') or {}
+      tags = globalTags.get('tags') or []
+      tagAssociationClassList = []
+      for tag in tags:
+        tagAssociationClassList.append(TagAssociationClass(tag=tag.get('tag')))
+      editableSchemaFieldInfoClassList.append(
+          EditableSchemaFieldInfoClass(
+              fieldPath=fieldPath,
+              description=description,
+              globalTags=GlobalTagsClass(tags=tagAssociationClassList)
+              if tagAssociationClassList else None,
+          ))
+    mcpw: MetadataChangeProposalWrapper = MetadataChangeProposalWrapper(
+        entityType='dataset',
+        changeType=ChangeTypeClass.UPSERT,
+        entityUrn=targetEntityUrn,
+        aspectName='editableSchemaMetadata',
+        aspect=EditableSchemaMetadataClass(
+            editableSchemaFieldInfo=editableSchemaFieldInfoClassList, ),
+    )
+    logger.info(mcpw)
+    graph.emit(mcpw)
+
+  def metadata_change_ownership_for(self, targetEntityUrn: str,
+                                    json_aspect_val: dict):
+    # table level ownership
+    ownerClassList = []
+    for each in json_aspect_val['owners']:
+      owner = each.get('owner')
+      htype = each.get('type')
+      source = each.get('source')
+      ownerClassList.append(
+          OwnerClass(
+              owner=owner,
+              type=htype,
+              source=source,
+          ))
+    mcpw: MetadataChangeProposalWrapper = MetadataChangeProposalWrapper(
+        entityType='dataset',
+        changeType=ChangeTypeClass.UPSERT,
+        entityUrn=targetEntityUrn,
+        aspectName='ownership',
+        aspect=OwnershipClass(
+            owners=ownerClassList,
+            lastModified=AuditStampClass(
+                time=json_aspect_val['lastModified']['time'],
+                actor=json_aspect_val['lastModified']['actor'])
+            if json_aspect_val.get('lastModified') is not None else None,
+        ),
+    )
+    logger.info(mcpw)
+    graph.emit(mcpw)
+
+  def metadata_change_globalTags_for(self, targetEntityUrn: str,
+                                     json_aspect_val: dict):
+    # table level tags
+    tagAssociationClassList = []
+    for each in json_aspect_val['tags']:
+      tag = each.get('tag')
+      if tag.split(':')[-2] == 'sendbird_region':
+        continue
+      tagAssociationClassList.append(TagAssociationClass(tag=tag, ))
+    mcpw: MetadataChangeProposalWrapper = MetadataChangeProposalWrapper(
+        entityType='dataset',
+        changeType=ChangeTypeClass.UPSERT,
+        entityUrn=targetEntityUrn,
+        aspectName='globalTags',
+        aspect=GlobalTagsClass(tags=tagAssociationClassList, ),
+    )
+    logger.info(mcpw)
+    graph.emit(mcpw)
+
   def act(self, event: EventEnvelope) -> None:
     if event.event_type != 'MetadataChangeLogEvent_v1':
       return
@@ -119,103 +220,18 @@ class MirrorAction(Action):
           is_elasticsearch=True if self.platform == 'elasticsearch' else False)
       logger.info(f'targetEntityUrn: {targetEntityUrn}')
       if ev.aspectName == 'editableDatasetProperties':
-        # table level description
-        mcpw: MetadataChangeProposalWrapper = MetadataChangeProposalWrapper(
-            entityType='dataset',
-            changeType=ChangeTypeClass.UPSERT,
-            entityUrn=targetEntityUrn,
-            aspectName='editableDatasetProperties',
-            aspect=EditableDatasetPropertiesClass(
-                description=json_aspect_val['description'],
-                created=AuditStampClass(
-                    time=json_aspect_val['created']['time'],
-                    actor=json_aspect_val['created']['actor'])
-                if json_aspect_val.get('created') is not None else None,
-                lastModified=AuditStampClass(
-                    time=json_aspect_val['lastModified']['time'],
-                    actor=json_aspect_val['lastModified']['actor'])
-                if json_aspect_val.get('lastModified') is not None else None,
-            ),
-        )
-        logger.info(mcpw)
-        graph.emit(mcpw)
+        self.metadata_change_editableDatasetProperties_for(
+            targetEntityUrn, json_aspect_val)
 
       elif ev.aspectName == 'editableSchemaMetadata':
-        # column level description/tags
-        editableSchemaFieldInfoClassList = []
-        for each in json_aspect_val['editableSchemaFieldInfo']:
-          fieldPath = each.get('fieldPath')
-          description = each.get('description')
-          globalTags = each.get('globalTags') or {}
-          tags = globalTags.get('tags') or []
-          tagAssociationClassList = []
-          for tag in tags:
-            tagAssociationClassList.append(
-                TagAssociationClass(tag=tag.get('tag')))
-          editableSchemaFieldInfoClassList.append(
-              EditableSchemaFieldInfoClass(
-                  fieldPath=fieldPath,
-                  description=description,
-                  globalTags=GlobalTagsClass(tags=tagAssociationClassList)
-                  if tagAssociationClassList else None,
-              ))
-        mcpw: MetadataChangeProposalWrapper = MetadataChangeProposalWrapper(
-            entityType='dataset',
-            changeType=ChangeTypeClass.UPSERT,
-            entityUrn=targetEntityUrn,
-            aspectName='editableSchemaMetadata',
-            aspect=EditableSchemaMetadataClass(
-                editableSchemaFieldInfo=editableSchemaFieldInfoClassList, ),
-        )
-        logger.info(mcpw)
-        graph.emit(mcpw)
+        self.metadata_change_editableSchemaMetadata_for(
+            targetEntityUrn, json_aspect_val)
 
       elif ev.aspectName == 'ownership':
-        # table level ownership
-        ownerClassList = []
-        for each in json_aspect_val['owners']:
-          owner = each.get('owner')
-          htype = each.get('type')
-          source = each.get('source')
-          ownerClassList.append(
-              OwnerClass(
-                  owner=owner,
-                  type=htype,
-                  source=source,
-              ))
-        mcpw: MetadataChangeProposalWrapper = MetadataChangeProposalWrapper(
-            entityType='dataset',
-            changeType=ChangeTypeClass.UPSERT,
-            entityUrn=targetEntityUrn,
-            aspectName='ownership',
-            aspect=OwnershipClass(
-                owners=ownerClassList,
-                lastModified=AuditStampClass(
-                    time=json_aspect_val['lastModified']['time'],
-                    actor=json_aspect_val['lastModified']['actor'])
-                if json_aspect_val.get('lastModified') is not None else None,
-            ),
-        )
-        logger.info(mcpw)
-        graph.emit(mcpw)
+        self.metadata_change_ownership_for(targetEntityUrn, json_aspect_val)
 
       elif ev.aspectName == 'globalTags':
-        # table level tags
-        tagAssociationClassList = []
-        for each in json_aspect_val['tags']:
-          tag = each.get('tag')
-          if tag.split(':')[-2] == 'sendbird_region':
-            continue
-          tagAssociationClassList.append(TagAssociationClass(tag=tag, ))
-        mcpw: MetadataChangeProposalWrapper = MetadataChangeProposalWrapper(
-            entityType='dataset',
-            changeType=ChangeTypeClass.UPSERT,
-            entityUrn=targetEntityUrn,
-            aspectName='globalTags',
-            aspect=GlobalTagsClass(tags=tagAssociationClassList, ),
-        )
-        logger.info(mcpw)
-        graph.emit(mcpw)
+        self.metadata_change_globalTags_for(targetEntityUrn, json_aspect_val)
 
   def close(self) -> None:
     pass
