@@ -91,7 +91,7 @@ acryl-datahub-actions:
   enabled: true
   image:
     repository: 314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell
-    tag: "custom-datahub-actions-v0.0.6"
+    tag: "custom-datahub-actions-v0.0.6-2"
   resources:
     requests:
       cpu: 300m
