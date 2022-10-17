@@ -46,6 +46,15 @@ datahub-frontend:
       value: 'openid profile email groups'
 
 acryl-datahub-actions:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: eks.amazonaws.com/nodegroup
+                operator: In
+                values:
+                  - *default-node-group
   image:
     repository: 314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell
     tag: "custom-datahub-actions-v0.0.6-stg-4"
