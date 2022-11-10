@@ -57,7 +57,7 @@ acryl-datahub-actions:
                   - *default-node-group
   image:
     repository: 314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell
-    tag: "custom-datahub-actions-v0.0.6-stg-5"
+    tag: "custom-datahub-actions-v0.0.7-stg"
   extraEnvs:
     - name: PYTHONPATH
       value: /etc/datahub
