@@ -24,6 +24,10 @@ datahub-gms:
       cpu: 1000m
       memory: 8Gi
 
+  service:
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: owner=dataplatform,purpose=datahub,sbregion=awsregional,sendbird_region=awsregional
+
 datahub-frontend:
   enabled: true
   image:
@@ -62,6 +66,7 @@ datahub-frontend:
     targetPort: 9002
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-ssl-cert: 'arn:aws:acm:ap-northeast-2:012481551608:certificate/ef2e4fdd-4b9b-4dca-975e-b4eef047ee79'
+      service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: owner=dataplatform,purpose=datahub,sbregion=awsregional,sendbird_region=awsregional
     spec:
       loadBalancerSourceRanges:
         - "54.248.189.144/32"
