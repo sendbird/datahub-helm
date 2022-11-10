@@ -101,6 +101,12 @@ mysql:
     persistence:
       size: 300Gi
 
+postgresql:
+  enabled: false
+  auth:
+    # For better security, add postgresql-secrets k8s secret with postgres-password, replication-password and password
+    existingSecret: postgresql-secrets
+
 cp-helm-charts:
   # Schema registry is under the community license
   cp-schema-registry:
