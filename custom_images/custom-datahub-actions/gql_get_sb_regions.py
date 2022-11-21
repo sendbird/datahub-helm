@@ -23,14 +23,22 @@ def get_sb_regions(gms_endpoint: str, token: str, gql_query: str,
           query: "{gql_query}",
           start: 0,
           count: 100,
-          filters: [
+          orFilters: [
             {{
-              field: "platform",
-              value: "urn:li:dataPlatform:{platform}"
-            }},
-            {{
-              field: "origin",
-              value: "{ENV.upper()}"
+              and: [
+                {{
+                  field: "platform",
+                  values: [
+                    "urn:li:dataPlatform:{platform}" 
+                  ]
+                }},
+                {{
+                  field: "origin",
+                  values: [
+                    "{ENV.upper()}"
+                  ]
+                }}
+              ]
             }}
           ]
         }}
