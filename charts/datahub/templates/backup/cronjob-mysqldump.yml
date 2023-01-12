@@ -47,4 +47,4 @@ spec:
                 - -c
                 - NOW=$(date "+%Y-%m-%dT%H-%M-%S");
                   mysqldump -h ${SVC_MYSQL} ${DB_NAME} ${TABLE_NAME} > dump_{{ .Release.Namespace }}_${NOW}.sql;
-                  aws s3 cp dump_${NOW}.sql ${S3_BUCKET}/;
+                  aws s3 cp dump_{{ .Release.Namespace }}_${NOW}.sql ${S3_BUCKET}/;
