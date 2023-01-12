@@ -10,9 +10,10 @@ spec:
         spec:
           restartPolicy: OnFailure
           nodeSelector:
-            eks.amazonaws.com/nodegroup: dataplatform-apne2-airflow-local-stg-datahub_nodegroup
+            eks.amazonaws.com/nodegroup: {{ .Values.myNodeGroup }}
           containers:
             - name: dh-mysql-backup
+              # Refer to custom_images/datahub-mysqldump/Dockerfile
               image: 314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell:datahub-mysqldump
               resources:
                 requests:
@@ -40,7 +41,7 @@ spec:
                       name: s3-secret-key
                       key: s3.client.default.secret_key
                 - name: S3_BUCKET
-                  value: s3://dataplatform-apne2-datahub-backup-data-stg/mysql
+                  value: {{ .Values.backup_s3_bucket }}
               args:
                 - /bin/sh
                 - -c
