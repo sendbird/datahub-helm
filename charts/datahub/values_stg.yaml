@@ -1,6 +1,7 @@
 # used as global variables
 myNodeGroup: &default-node-group "dataplatform-apne2-airflow-local-stg-datahub_nodegroup"
 
+backup_s3_bucket: "s3://dataplatform-apne2-datahub-backup-data-stg/mysql"
 
 datahub-gms:
   affinity:

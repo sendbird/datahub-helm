@@ -1,6 +1,7 @@
 # used as global variables
 myNodeGroup: &default-node-group "dataplatform-apne2-airflow-local-prod-datahub_nodegroup"
 
+backup_s3_bucket: "s3://dataplatform-apne2-datahub-backup-data-prod/mysql"
 
 # Values to start up datahub after starting up the datahub-prerequisites chart with "prerequisites" release name
 # Copy this chart and change configuration as needed.
