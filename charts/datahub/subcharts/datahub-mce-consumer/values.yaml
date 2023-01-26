@@ -9,7 +9,7 @@ revisionHistoryLimit: 10
 image:
   repository: linkedin/datahub-mce-consumer
   pullPolicy: IfNotPresent
-  tag: head
+  tag:
 
 imagePullSecrets: []
 nameOverride: ""
@@ -163,6 +163,7 @@ global:
       url: "http://schema-registry:8081"
 
   datahub:
+    version: head
     monitoring:
       enablePrometheus: false
     gms:
@@ -173,6 +174,16 @@ global:
       # systemClientSecret:
       #  secretRef: <secret-ref>
       #  secretKey: <secret-key>
+
+  sql:
+    datasource:
+      host: "mysql:3306"
+      url: "jdbc:mysql://mysql:3306/datahub?verifyServerCertificate=false&useSSL=true"
+      driver: "com.mysql.cj.jdbc.Driver"
+      username: "datahub"
+      password:
+        secretRef: "mysql-secrets"
+        secretKey: "mysql-password"
 
   hostAliases:
     - ip: "192.168.0.104"

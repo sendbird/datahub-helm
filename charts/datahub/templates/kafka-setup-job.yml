@@ -56,8 +56,8 @@ spec:
       {{- end }}
       containers:
         - name: kafka-setup-job
-          image: "{{ .Values.kafkaSetupJob.image.repository }}:{{ .Values.kafkaSetupJob.image.tag }}"
-          imagePullPolicy: {{ .Values.kafkaSetupJob.imagePullPolicy | default "IfNotPresent" }}
+          image: "{{ .Values.kafkaSetupJob.image.repository }}:{{ required "Global or specific tag is required" ( .Values.kafkaSetupJob.image.tag | default .Values.global.datahub.version) }}"
+          imagePullPolicy: {{ .Values.kafkaSetupJob.image.pullPolicy | default "IfNotPresent" }}
           env:
             - name: KAFKA_ZOOKEEPER_CONNECT
               value: {{ .Values.global.kafka.zookeeper.server | quote }}
@@ -77,6 +77,26 @@ spec:
                   name: {{ $.Values.global.credentialsAndCertsSecrets.name }}
                   key: {{ $envVarValue }}
             {{- end }}
+            {{- end }}
+            {{- with .Values.global.kafka.topics }}
+            - name: METADATA_CHANGE_EVENT_NAME
+              value: {{ .metadata_change_event_name }}
+            - name: FAILED_METADATA_CHANGE_EVENT_NAME
+              value: {{ .failed_metadata_change_event_name }}
+            - name: METADATA_AUDIT_EVENT_NAME
+              value: {{ .metadata_audit_event_name }}
+            - name: DATAHUB_USAGE_EVENT_NAME
+              value: {{ .datahub_usage_event_name }}
+            - name: METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+              value: {{ .metadata_change_proposal_topic_name }}
+            - name: FAILED_METADATA_CHANGE_PROPOSAL_TOPIC_NAME
+              value: {{ .failed_metadata_change_proposal_topic_name }}
+            - name: METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME
+              value: {{ .metadata_change_log_versioned_topic_name }}
+            - name: METADATA_CHANGE_LOG_TIMESERIES_TOPIC_NAME
+              value: {{ .metadata_change_log_timeseries_topic_name }}
+            - name: PLATFORM_EVENT_TOPIC_NAME
+              value: {{ .platform_event_topic_name }}
             {{- end }}
             {{- with .Values.global.kafka.partitions }}
             - name: PARTITIONS
@@ -100,12 +120,7 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           resources:
-            limits:
-              cpu: 500m
-              memory: 512Mi
-            requests:
-              cpu: 300m
-              memory: 256Mi
+            {{- toYaml .Values.kafkaSetupJob.resources | nindent 12 }}
       {{- with .Values.kafkaSetupJob.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
