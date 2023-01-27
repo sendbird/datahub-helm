@@ -35,6 +35,9 @@ datahub-gms:
   service:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: owner=dataplatform,purpose=datahub,sbregion=awsregional,sendbird_region=awsregional
+  extraEnvs:
+    - name: GRAPH_SERVICE_DIFF_MODE_ENABLED
+      value: "false"
 
 datahub-frontend:
   enabled: true
