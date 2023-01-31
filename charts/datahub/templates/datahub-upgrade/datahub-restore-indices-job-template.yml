@@ -62,8 +62,8 @@ spec:
           {{- end }}
           containers:
             - name: datahub-upgrade-job
-              image: "{{ .Values.datahubUpgrade.image.repository }}:{{ .Values.datahubUpgrade.image.tag }}"
-              imagePullPolicy: {{ .Values.datahubUpgrade.imagePullPolicy | default "IfNotPresent" }}
+              image: "{{ .Values.datahubUpgrade.image.repository }}:{{ required "Global or specific tag is required" (.Values.datahubUpgrade.image.tag | default .Values.global.datahub.version) }}"
+              imagePullPolicy: {{ .Values.datahubUpgrade.image.pullPolicy | default "IfNotPresent" }}
               args:
                 - "-u"
                 - "RestoreIndices"
@@ -72,6 +72,24 @@ spec:
                 - "-a"
                 - "batchDelayMs={{ .Values.datahubUpgrade.batchDelayMs }}"
               env:
+                - name: EBEAN_DATASOURCE_USERNAME
+                  value: {{ (.Values.sql).datasource.username | default .Values.global.sql.datasource.username | quote }}
+                - name: EBEAN_DATASOURCE_PASSWORD
+                  {{- $passwordValue := (.Values.sql).datasource.password.value | default .Values.global.sql.datasource.password.value }}
+                  {{- if $passwordValue }}
+                  value: {{ $passwordValue | quote }}
+                  {{- else }}
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ (.Values.sql).datasource.password.secretRef | default .Values.global.sql.datasource.password.secretRef }}"
+                      key: "{{ (.Values.sql).datasource.password.secretKey | default .Values.global.sql.datasource.password.secretKey }}"
+                  {{- end }}
+                - name: EBEAN_DATASOURCE_HOST
+                  value: "{{ .Values.global.sql.datasource.host }}"
+                - name: EBEAN_DATASOURCE_URL
+                  value: "{{ .Values.global.sql.datasource.url }}"
+                - name: EBEAN_DATASOURCE_DRIVER
+                  value: "{{ .Values.global.sql.datasource.driver }}"
                 {{- include "datahub.upgrade.env" . | nindent 16}}
               {{- with .Values.datahubUpgrade.extraEnvs }}
                 {{- toYaml . | nindent 16 }}
