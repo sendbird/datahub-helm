@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: datahub-helm
+  description: This is a helm-chart used by Argo CD to provision DataHub.
+  annotations:
+    github.com/project-slug: sendbird/datahub-helm
+spec:
+  type: cluster
+  lifecycle: production
+  owner: team-data-platform
+  system: sendbird-data-platform
