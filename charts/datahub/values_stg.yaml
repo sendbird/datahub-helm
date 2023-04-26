@@ -1,29 +1,7 @@
 # used as global variables
-myNodeGroup: &default-node-group "dataplatform-apne2-airflow-local-stg-datahub_nodegroup"
-
 backup_s3_bucket: "s3://dataplatform-apne2-datahub-backup-data-stg/mysql"
 
-datahub-gms:
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: eks.amazonaws.com/nodegroup
-                operator: In
-                values:
-                  - *default-node-group
-
 datahub-frontend:
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: eks.amazonaws.com/nodegroup
-                operator: In
-                values:
-                  - *default-node-group
   service:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-ssl-cert: 'arn:aws:acm:ap-northeast-2:232797014574:certificate/a74d9ef9-f4f2-4ebf-b6ee-04d42929b1ac'
@@ -47,15 +25,6 @@ datahub-frontend:
       value: 'openid profile email groups'
 
 acryl-datahub-actions:
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: eks.amazonaws.com/nodegroup
-                operator: In
-                values:
-                  - *default-node-group
   image:
     repository: 314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell
     tag: "custom-datahub-actions-v0.0.7-stg-2"
