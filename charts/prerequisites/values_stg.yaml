@@ -1,10 +1,48 @@
+# used as global variables
+myNodeGroup: &default-node-group "dataplatform-apne2-airflow-local-stg-datahub_nodegroup"
+
+
 elasticsearch:
   replicas: 2
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: eks.amazonaws.com/nodegroup
+              operator: In
+              values:
+                - *default-node-group
+
+neo4j-community:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: eks.amazonaws.com/nodegroup
+                operator: In
+                values:
+                  - *default-node-group
 
 mysql:
   primary:
+    nodeAffinityPreset:
+      values:
+        - *default-node-group
     persistence:
       size: 100Gi
 
+cp-helm-charts:
+  cp-schema-registry:
+    nodeSelector:
+      eks.amazonaws.com/nodegroup: *default-node-group
+
 kafka:
   replicaCount: 1
+  nodeAffinityPreset:
+    values:
+      - *default-node-group
+  zookeeper:
+    nodeAffinityPreset:
+      values:
+        - *default-node-group

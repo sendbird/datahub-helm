@@ -1,0 +1,13 @@
+# used as global variables
+myNodeGroup: &default-node-group "dataplatform-apne2-airflow-local-stg-datahub_nodegroup"
+
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: eks.amazonaws.com/nodegroup
+              operator: In
+              values:
+                - *default-node-group

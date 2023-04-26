@@ -1,4 +1,7 @@
 # used as global variables
+myNodeGroup: &default-node-group "dataplatform-apne2-airflow-local-prod-datahub_nodegroup"
+
+
 elasticsearchHosts: "http://elasticsearch-master:9200"
 
 replicas: 1
@@ -158,6 +161,15 @@ readinessProbe:
 imagePullSecrets: []
 nodeSelector: {}
 tolerations: []
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: eks.amazonaws.com/nodegroup
+              operator: In
+              values:
+                - *default-node-group
 
 nameOverride: ""
 fullnameOverride: ""
