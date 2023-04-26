@@ -1,6 +1,4 @@
 # used as global variables
-myNodeGroup: &default-node-group "dataplatform-apne2-airflow-local-prod-datahub_nodegroup"
-
 backup_s3_bucket: "s3://dataplatform-apne2-datahub-backup-data-prod/mysql"
 
 # Values to start up datahub after starting up the datahub-prerequisites chart with "prerequisites" release name
@@ -11,15 +9,6 @@ datahub-gms:
     repository: linkedin/datahub-gms
     # tag: "v0.9.6.1 # defaults to .global.datahub.version
 
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: eks.amazonaws.com/nodegroup
-                operator: In
-                values:
-                  - *default-node-group
   resources:
     requests:
       cpu: 1000m
@@ -44,15 +33,6 @@ datahub-frontend:
   # Set up ingress to expose react front-end
   ingress:
     enabled: false
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: eks.amazonaws.com/nodegroup
-                operator: In
-                values:
-                  - *default-node-group
   resources:
     requests:
       cpu: 250m
@@ -105,15 +85,6 @@ acryl-datahub-actions:
   image:
     repository: 314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell
     tag: "custom-datahub-actions-v0.0.7-2"
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: eks.amazonaws.com/nodegroup
-                operator: In
-                values:
-                  - *default-node-group
   resources:
     requests:
       cpu: 300m
