@@ -85,6 +85,8 @@ acryl-datahub-actions:
   image:
     repository: 314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell
     tag: "custom-datahub-actions-v0.0.7-2"
+  nodeSelector:
+    kubernetes.io/arch: amd64
   resources:
     requests:
       cpu: 300m
