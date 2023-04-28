@@ -156,8 +156,6 @@ readinessProbe:
   timeoutSeconds: 5
 
 imagePullSecrets: []
-nodeSelector:
-  kubernetes.io/arch: amd64
 tolerations: []
 
 nameOverride: ""

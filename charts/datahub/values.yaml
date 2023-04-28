@@ -8,12 +8,10 @@ datahub-gms:
   image:
     repository: linkedin/datahub-gms
     # tag: "v0.9.6.1 # defaults to .global.datahub.version
-  nodeSelector:
-    kubernetes.io/arch: amd64
   resources:
     requests:
       cpu: 1000m
-      memory: 8Gi
+      memory: 6Gi
   # Optionally set a GMS specific SQL login (defaults to global login)
   # sql:
   #   datasource:
@@ -34,12 +32,10 @@ datahub-frontend:
   # Set up ingress to expose react front-end
   ingress:
     enabled: false
-  nodeSelector:
-    kubernetes.io/arch: amd64
   resources:
     requests:
       cpu: 250m
-      memory: 2Gi
+      memory: 1.6Gi
   existingGmsSecret:
     name: datahub-gms-secret
     key: datahub.gms.secret
@@ -93,7 +89,7 @@ acryl-datahub-actions:
   resources:
     requests:
       cpu: 300m
-      memory: 256Mi
+      memory: 650Mi
   extraEnvs:
     - name: PYTHONPATH
       value: /etc/datahub

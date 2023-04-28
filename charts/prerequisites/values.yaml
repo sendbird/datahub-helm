@@ -24,8 +24,8 @@ elasticsearch:
   # Allocate smaller chunks of memory per pod.
   resources:
     requests:
-      cpu: "2000m"
-      memory: "16Gi"
+      cpu: "180m"
+      memory: "26Gi"
     limits: ~
 
   # Request smaller persistent volumes.
