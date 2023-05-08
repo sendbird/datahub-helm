@@ -1,7 +1,3 @@
-# used as global variables
-myNodeGroup: &default-node-group "dataplatform-apne2-airflow-local-prod-datahub_nodegroup"
-
-
 # Default configuration for pre-requisites to get you started
 # Copy this file and update to the configuration of choice
 elasticsearch:
@@ -28,8 +24,8 @@ elasticsearch:
   # Allocate smaller chunks of memory per pod.
   resources:
     requests:
-      cpu: "2000m"
-      memory: "16Gi"
+      cpu: "180m"
+      memory: "26Gi"
     limits: ~
 
   # Request smaller persistent volumes.
@@ -39,15 +35,8 @@ elasticsearch:
     resources:
       requests:
         storage: 100Gi
-
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: eks.amazonaws.com/nodegroup
-              operator: In
-              values:
-                - *default-node-group
+  nodeSelector:
+    kubernetes.io/arch: amd64
 
 # Official neo4j chart uses the Neo4j Enterprise Edition which requires a license
 neo4j:
@@ -67,15 +56,8 @@ neo4j-community:
   defaultDatabase: "graph.db"
   # For better security, add neo4j-secrets k8s secret with neo4j-password and uncomment below
   existingPasswordSecret: neo4j-secrets
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: eks.amazonaws.com/nodegroup
-                operator: In
-                values:
-                  - *default-node-group
+  nodeSelector:
+    kubernetes.io/arch: amd64
   resources:
     requests:
       cpu: 1000m
@@ -89,11 +71,8 @@ mysql:
     # For better security, add mysql-secrets k8s secret with mysql-root-password, mysql-replication-password and mysql-password
     existingSecret: mysql-secrets
   primary:
-    nodeAffinityPreset:
-      type: hard
-      key: eks.amazonaws.com/nodegroup
-      values:
-        - *default-node-group
+    nodeSelector:
+      kubernetes.io/arch: amd64
     resources:
       requests:
         cpu: 1000m
@@ -115,7 +94,7 @@ cp-helm-charts:
       bootstrapServers: "prerequisites-kafka:9092"  # <<release-name>>-kafka:9092
     heapOptions: "-Xms1024M -Xmx1024M"
     nodeSelector:
-      eks.amazonaws.com/nodegroup: *default-node-group
+      kubernetes.io/arch: amd64
     resources:
       requests:
         cpu: 666m
@@ -136,11 +115,8 @@ cp-helm-charts:
 # Bitnami version of Kafka that deploys open source Kafka https://artifacthub.io/packages/helm/bitnami/kafka
 kafka:
   enabled: true
-  nodeAffinityPreset:
-    type: hard
-    key: eks.amazonaws.com/nodegroup
-    values:
-      - *default-node-group
+  nodeSelector:
+    kubernetes.io/arch: amd64
   resources:
     requests:
       cpu: 500m
@@ -151,11 +127,8 @@ kafka:
   heapOpts: -Xmx3072m -Xms3072m
   podAntiAffinityPreset: hard
   zookeeper:
-    nodeAffinityPreset:
-      type: hard
-      key: eks.amazonaws.com/nodegroup
-      values:
-        - *default-node-group
+    nodeSelector:
+      kubernetes.io/arch: amd64
     resources:
       requests:
         cpu: 666m
