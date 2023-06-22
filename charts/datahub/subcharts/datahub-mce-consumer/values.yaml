@@ -24,11 +24,6 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name:
 
-<<<<<<< HEAD
-serviceAccount:
-  create: false
-=======
->>>>>>> upstream/master
 
 podAnnotations: {}
   # co.elastic.logs/enabled: "true"
