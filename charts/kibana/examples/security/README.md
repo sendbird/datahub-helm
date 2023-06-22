@@ -1,6 +1,6 @@
 # Security
 
-This example deploy Kibana 7.16.2 using authentication and TLS to connect to
+This example deploy Kibana 7.17.3 using authentication and TLS to connect to
 Elasticsearch (see [values][]).
 
 
@@ -23,6 +23,6 @@ Elasticsearch (see [values][]).
 You can also run [goss integration tests][] using `make test`
 
 
-[elasticsearch helm chart]: https://github.com/elastic/helm-charts/tree/7.16/elasticsearch/examples/security/
-[goss integration tests]: https://github.com/elastic/helm-charts/tree/7.16/kibana/examples/security/test/goss.yaml
-[values]: https://github.com/elastic/helm-charts/tree/7.16/kibana/examples/security/values.yaml
+[elasticsearch helm chart]: https://github.com/elastic/helm-charts/tree/7.17/elasticsearch/examples/security/
+[goss integration tests]: https://github.com/elastic/helm-charts/tree/7.17/kibana/examples/security/test/goss.yaml
+[values]: https://github.com/elastic/helm-charts/tree/7.17/kibana/examples/security/values.yaml

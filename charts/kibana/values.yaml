@@ -1,4 +1,4 @@
-# used as global variables
+---
 elasticsearchHosts: "http://elasticsearch-master:9200"
 
 replicas: 1
@@ -35,20 +35,21 @@ hostAliases: []
 #  - "bar.local"
 
 image: "docker.elastic.co/kibana/kibana"
-imageTag: "7.16.2"
+imageTag: "7.17.3"
 imagePullPolicy: "IfNotPresent"
 
 # additionals labels
 labels: {}
 
-podAnnotations:
-  {}
-  # iam.amazonaws.com/role: es-cluster
+annotations: {}
+
+podAnnotations: {}
+# iam.amazonaws.com/role: es-cluster
 
 resources:
   requests:
-    cpu: "500m"
-    memory: "4Gi"
+    cpu: "1000m"
+    memory: "2Gi"
 #  limits:
 #    cpu: "1000m"
 #    memory: "2Gi"
@@ -101,12 +102,13 @@ extraVolumeMounts:
   #   mountPath: /usr/share/extras
   #   readOnly: true
   #
-extraContainers: ""
+
+extraContainers: []
 # - name: dummy-init
 #   image: busybox
 #   command: ['echo', 'hey']
 
-extraInitContainers: ""
+extraInitContainers: []
 # - name: dummy-init
 #   image: busybox
 #   command: ['echo', 'hey']
@@ -156,7 +158,9 @@ readinessProbe:
   timeoutSeconds: 5
 
 imagePullSecrets: []
+nodeSelector: {}
 tolerations: []
+affinity: {}
 
 nameOverride: ""
 fullnameOverride: ""
