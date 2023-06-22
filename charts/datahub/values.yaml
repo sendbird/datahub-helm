@@ -243,6 +243,9 @@ postgresqlSetupJob:
   #   - name: "DATAHUB_DB_NAME"
   #     value: "dh"
 
+datahubUpgradeBuildIndices:
+  enabled: false
+
 ## No code data migration
 datahubUpgrade:
   enabled: true
