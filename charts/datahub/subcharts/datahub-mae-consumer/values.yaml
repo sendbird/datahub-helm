@@ -61,6 +61,14 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+# Extra labels for Deployment
+extraLabels: {}
+  # owner: myteam
+  # environment: test
+
+# Extra labels for the Pods
+extraPodLabels: {}
+
 # Extra environment variables
 # This will be appended to the current 'env:' key. You can use any of the kubernetes env
 # syntax here
@@ -78,6 +86,12 @@ extraVolumeMounts: []
   #   readOnly: true
 
 extraInitContainers: []
+
+# Add extra sidecar containers to deployment pod
+extraSidecars: []
+  # - name: my-image-name
+  #   image: my-image
+  #   imagePullPolicy: Always
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -160,11 +174,6 @@ global:
     host: "elasticsearch"
     port: "9200"
     skipcheck: "false"
-    ## Settings for supporting datahub-upgrade job for index creation/reindex
-    index:
-      ## The following options control settings for datahub-upgrade job when creating or reindexing indices
-      upgrade:
-        enabled: true
 
   kafka:
     bootstrap:
@@ -182,11 +191,21 @@ global:
 
   datahub:
     version: head
+    gms:
+      port: "8080"
     monitoring:
       enablePrometheus: false
 
+    systemUpdate:
+      ## The following options control settings for datahub-upgrade job which will
+      ## managed ES indices and other update related work
+      enabled: true
+
     mae_consumer:
       port: "9091"
+
+    managed_ingestion:
+      enabled: true
 
     metadata_service_authentication:
       enabled: false
@@ -194,6 +213,12 @@ global:
       # systemClientSecret:
       #  secretRef: <secret-ref>
       #  secretKey: <secret-key>
+
+    ## Enables always emitting a MCL even when no changes are detected. Used for Time Based Lineage when no changes occur.
+    alwaysEmitChangeLog: false
+
+    ## Enables diff mode for graph writes, uses a different code path that produces a diff from previous to next to write relationships instead of wholesale deleting edges and reading
+    enableGraphDiffMode: true
 
   hostAliases:
     - ip: "192.168.0.104"

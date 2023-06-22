@@ -1,22 +1,25 @@
 # Default configuration for pre-requisites to get you started
 # Copy this file and update to the configuration of choice
 elasticsearch:
-  image: "314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell"
-  imageTag: "elas-s3-7.16.2"
+#  image: "314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell"
+#  imageTag: "elas-s3-7.16.2"
 
-  keystore:
-    - secretName: s3-access-key
-    - secretName: s3-secret-key
+#  keystore:
+#    - secretName: s3-access-key
+#    - secretName: s3-secret-key
 
   enabled: true   # set this to false, if you want to provide your own ES instance.
-  replicas: 3
+
+  # If you're running in production, set this to 3 and comment out antiAffinity below
+  # Or alternatively if you're running production, bring your own ElasticSearch
+  replicas: 1
   minimumMasterNodes: 1
   # Set replicas to 1 and uncomment this to allow the instance to be scheduled on
   # a master node when deploying on a single node Minikube / Kind / etc cluster.
-  # antiAffinity: "soft"
+  antiAffinity: "soft"
 
-  # # If your running a single replica cluster add the following helm value
-  # clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
+  # # If you are running a multi-replica cluster, comment this out
+  clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 
   # Shrink default JVM heap.
   esJavaOpts: "-Xmx14g -Xms14g"
@@ -51,7 +54,7 @@ neo4j:
 
 # Deploys neo4j community version. Only supports single node
 neo4j-community:
-  enabled: false   # set this to false, if you have a license for the enterprise edition
+  enabled: false   # set this to true, if you want to run neo4j community edition
   acceptLicenseAgreement: "yes"
   defaultDatabase: "graph.db"
   # For better security, add neo4j-secrets k8s secret with neo4j-password and uncomment below
@@ -86,10 +89,35 @@ postgresql:
     # For better security, add postgresql-secrets k8s secret with postgres-password, replication-password and password
     existingSecret: postgresql-secrets
 
+# Using gcloud-proxy requires the node in a GKE cluster to have Cloud SQL Admin scope,
+# you will need to create a new node and migrate the workload if your current node does not have this scope
+gcloud-sqlproxy:
+  enabled: false
+  # Specify an existing secret holding the cloud-sql service account credentials, if not specify,
+  # the default compute engine service account will be used and it needs to have Cloud SQL Client role
+  existingSecret: ""
+  # The key in the existing secret that stores the credentials
+  existingSecretKey: ""
+  # SQL connection settings
+  cloudsql:
+    # MySQL instances:
+    # update with your GCP project, the region of your Cloud SQL instance and the id of your Cloud SQL instance
+    # use port 3306 for MySQL, or other port you set for your SQL instance.
+    instances:
+      # GCP Cloud SQL instance id
+    - instance: ""
+      # GCP project where the instance exists.
+      project: ""
+      # GCP region where the instance exists.
+      region: ""
+      # Port number for the proxy to expose for this instance.
+      port: 3306
+
 cp-helm-charts:
+  enabled: false
   # Schema registry is under the community license
   cp-schema-registry:
-    enabled: true
+    enabled: false
     kafka:
       bootstrapServers: "prerequisites-kafka:9092"  # <<release-name>>-kafka:9092
     heapOptions: "-Xms1024M -Xmx1024M"
@@ -126,7 +154,10 @@ kafka:
   replicaCount: 3
   heapOpts: -Xmx3072m -Xms3072m
   podAntiAffinityPreset: hard
+  kraft:
+    enabled: false
   zookeeper:
+    enabled: true
     nodeSelector:
       kubernetes.io/arch: amd64
     resources:
