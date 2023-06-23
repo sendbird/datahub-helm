@@ -1,12 +1,12 @@
 # Default configuration for pre-requisites to get you started
 # Copy this file and update to the configuration of choice
 elasticsearch:
-#  image: "314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell"
-#  imageTag: "elas-s3-7.16.2"
+  image: "314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell"
+  imageTag: "elas-s3-7.17.3"
 
-#  keystore:
-#    - secretName: s3-access-key
-#    - secretName: s3-secret-key
+  keystore:
+    - secretName: s3-access-key
+    - secretName: s3-secret-key
 
   enabled: true   # set this to false, if you want to provide your own ES instance.
 

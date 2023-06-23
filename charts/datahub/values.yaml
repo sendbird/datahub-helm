@@ -87,10 +87,8 @@ datahub-frontend:
 acryl-datahub-actions:
   enabled: true
   image:
-#    repository: 314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell
-#    tag: "custom-datahub-actions-v0.0.7-2"
-    repository: acryldata/datahub-actions
-    tag: "v0.0.11"
+    repository: 314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell
+    tag: "custom-datahub-actions-v0.0.11"
   # mount the k8s secret as a volume in the container, each key name is mounted as a file on the mount path /etc/datahub/ingestion-secret-files
   # ingestionSecretFiles:
   #   name: ${K8S_SECRET_NAME}
