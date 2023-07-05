@@ -29,10 +29,10 @@ secretMounts: []
 #    subPath: kibana.keystore # optional
 
 hostAliases: []
-#- ip: "127.0.0.1"
-#  hostnames:
-#  - "foo.local"
-#  - "bar.local"
+#  - ip: "127.0.0.1"
+#    hostnames:
+#      - "foo.local"
+#      - "bar.local"
 
 image: "docker.elastic.co/kibana/kibana"
 imageTag: "7.17.3"
@@ -145,10 +145,10 @@ ingress:
     - host: kibana-example.local
       paths:
         - path: /
-  #tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+#  tls: []
+#    - secretName: chart-example-tls
+#      hosts:
+#        - chart-example.local
 
 readinessProbe:
   failureThreshold: 3
@@ -175,4 +175,4 @@ lifecycle:
   #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
 
 # Deprecated - use only with versions < 6.6
-elasticsearchURL: "" # "http://elasticsearch-master:9200"
+elasticsearchURL: ""  # "http://elasticsearch-master:9200"

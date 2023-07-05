@@ -102,7 +102,7 @@ acryl-datahub-actions:
   extraEnvs:
     - name: PYTHONPATH
       value: /etc/datahub
-    - name : GMS_ENDPOINT
+    - name: GMS_ENDPOINT
       value: 'http://datahub-gms.dp.sendbird.com:8080'
     - name: ENV
       value: prod
