@@ -34,6 +34,13 @@ service:
   type: ClusterIP
   port: 9093
 
+# Extra labels for Deployment
+extraLabels: {}
+  # owner: myteam
+  # environment: test
+
+# Extra labels for the Pods
+extraPodLabels: {}
 
 # Extra environment variables
 # This will be appended to the current 'env:' key. You can use any of the kubernetes env
@@ -46,6 +53,12 @@ extraVolumeMounts: []
 
 extraInitContainers: []
 
+# Add extra sidecar containers to deployment pod
+extraSidecars: []
+  # - name: my-image-name
+  #   image: my-image
+  #   imagePullPolicy: Always
+
 resources: {}
 
 nodeSelector: {}
@@ -56,6 +69,11 @@ affinity: {}
 
 actions:
   kafkaAutoOffsetPolicy: "latest"
+
+# mount the k8s secret as a volume in the container, each key name is mounted as a file on the mount path /etc/datahub/ingestion-secret-files
+# ingestionSecretFiles:
+#   name: ${K8S_SECRET_NAME}
+#   defaultMode: "0444"
 
 global:
 
@@ -68,7 +86,7 @@ global:
   datahub:
     gms:
       port: "8080"
-    metadata_service_authentication: 
+    metadata_service_authentication:
       enabled: false
       systemClientId: "__datahub_system"
       # systemClientSecret:

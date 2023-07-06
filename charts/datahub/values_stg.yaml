@@ -27,7 +27,7 @@ datahub-frontend:
 acryl-datahub-actions:
   image:
     repository: 314716043882.dkr.ecr.ap-northeast-2.amazonaws.com/dataplatform/rivendell
-    tag: "custom-datahub-actions-v0.0.7-stg-2"
+    tag: "custom-datahub-actions-v0.0.11-stg"
   extraEnvs:
     - name: PYTHONPATH
       value: /etc/datahub

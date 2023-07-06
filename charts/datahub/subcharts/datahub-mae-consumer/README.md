@@ -10,7 +10,9 @@ Current chart version is `0.2.0`
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
 | exporters.jmx.enabled | boolean | false |  |
+| extraLabels | object | `{}` | Extra labels for deployment configuration |
 | extraEnvs | Extra [environment variables][] which will be appended to the `env:` definition for the container | `[]` |
+| extraSidecars | list | `[]` | Add additional sidecar containers to the deployment pod(s) |
 | extraVolumes | Templatable string of additional `volumes` to be passed to the `tpl` function | "" |
 | extraVolumeMounts | Templatable string of additional `volumeMounts` to be passed to the `tpl` function | "" |
 | fullnameOverride | string | `"datahub-mae-consumer"` |  |

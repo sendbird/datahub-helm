@@ -14,15 +14,24 @@ Return the env variables for upgrade jobs
 - name: DATAHUB_MAE_CONSUMER_PORT
   value: "{{ .Values.global.datahub.mae_consumer.port }}"
 - name: EBEAN_DATASOURCE_USERNAME
-  value: "{{ .Values.global.sql.datasource.username }}"
-- name: EBEAN_DATASOURCE_PASSWORD
-  {{- if .Values.global.sql.datasource.password.value }}
-  value: {{ .Values.global.sql.datasource.password.value | quote }}
+  {{- $usernameValue := (.Values.sql).datasource.username | default .Values.global.sql.datasource.username }}
+  {{- if and (kindIs "string" $usernameValue) $usernameValue }}
+  value: {{ $usernameValue | quote }}
   {{- else }}
   valueFrom:
     secretKeyRef:
-      name: "{{ .Values.global.sql.datasource.password.secretRef }}"
-      key: "{{ .Values.global.sql.datasource.password.secretKey }}"
+      name: "{{ (.Values.sql).datasource.username.secretRef | default .Values.global.sql.datasource.username.secretRef }}"
+      key: "{{ (.Values.sql).datasource.username.secretKey | default .Values.global.sql.datasource.username.secretKey }}"
+  {{- end }}
+- name: EBEAN_DATASOURCE_PASSWORD
+  {{- $passwordValue := (.Values.sql).datasource.password.value | default .Values.global.sql.datasource.password.value }}
+  {{- if $passwordValue }}
+  value: {{ $passwordValue | quote }}
+  {{- else }}
+  valueFrom:
+    secretKeyRef:
+      name: "{{ (.Values.sql).datasource.password.secretRef | default .Values.global.sql.datasource.password.secretRef }}"
+      key: "{{ (.Values.sql).datasource.password.secretKey | default .Values.global.sql.datasource.password.secretKey }}"
   {{- end }}
 - name: EBEAN_DATASOURCE_HOST
   value: "{{ .Values.global.sql.datasource.host }}"
@@ -41,8 +50,13 @@ Return the env variables for upgrade jobs
 {{- end }}
 - name: KAFKA_BOOTSTRAP_SERVER
   value: "{{ .Values.global.kafka.bootstrap.server }}"
+{{- if eq .Values.global.kafka.schemaregistry.type "INTERNAL" }}
+- name: KAFKA_SCHEMAREGISTRY_URL
+  value: {{ printf "http://%s-%s:%s/schema-registry/api/" .Release.Name "datahub-gms" .Values.global.datahub.gms.port }}
+{{- else if eq .Values.global.kafka.schemaregistry.type "KAFKA" }}
 - name: KAFKA_SCHEMAREGISTRY_URL
   value: "{{ .Values.global.kafka.schemaregistry.url }}"
+{{- end }}
 - name: ELASTICSEARCH_HOST
   value: {{ .Values.global.elasticsearch.host | quote }}
 - name: ELASTICSEARCH_PORT
@@ -59,10 +73,14 @@ Return the env variables for upgrade jobs
 - name: ELASTICSEARCH_USERNAME
   value: {{ .username }}
 - name: ELASTICSEARCH_PASSWORD
+  {{- if .password.value }}
+  value: {{ .password.value | quote }}
+  {{- else }}
   valueFrom:
     secretKeyRef:
       name: "{{ .password.secretRef }}"
       key: "{{ .password.secretKey }}"
+  {{- end }}
 {{- end }}
 {{- with .Values.global.elasticsearch.indexPrefix }}
 - name: INDEX_PREFIX
@@ -78,10 +96,14 @@ Return the env variables for upgrade jobs
 - name: NEO4J_USERNAME
   value: "{{ .Values.global.neo4j.username }}"
 - name: NEO4J_PASSWORD
+  {{- if .Values.global.neo4j.password.value }}
+  value: {{ .Values.global.neo4j.password.value | quote }}
+  {{- else }}
   valueFrom:
     secretKeyRef:
       name: "{{ .Values.global.neo4j.password.secretRef }}"
       key: "{{ .Values.global.neo4j.password.secretKey }}"
+  {{- end }}
 {{- end }}
 {{- if .Values.global.springKafkaConfigurationOverrides }}
 {{- range $configName, $configValue := .Values.global.springKafkaConfigurationOverrides }}
@@ -113,5 +135,7 @@ Return the env variables for upgrade jobs
   value: {{ .metadata_change_log_versioned_topic_name }}
 - name: METADATA_CHANGE_LOG_TIMESERIES_TOPIC_NAME
   value: {{ .metadata_change_log_timeseries_topic_name }}
+- name: DATAHUB_UPGRADE_HISTORY_TOPIC_NAME
+  value: {{ .datahub_upgrade_history_topic_name }}
 {{- end }}
 {{- end -}}

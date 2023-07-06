@@ -4,8 +4,15 @@ metadata:
   name: {{ include "datahub-gms.fullname" . }}
   labels:
     {{- include "datahub-gms.labels" . | nindent 4 }}
+    {{- range $key, $val := .Values.extraLabels }}
+    {{ $key }}: {{ $val | quote }}
+    {{- end }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  {{- if and (.Values.global.strict_mode) (gt .Values.replicaCount 1.0) (.Values.global.datahub.managed_ingestion.enabled) (not .Values.global.datahub_standalone_consumers_enabled)}}
+  {{- fail "\nManaged ingestion can not be used with multiple GMS instances in non standalone mode. Please enable standalone mode with only 1 MCE replica if you wish to run multiple GMS instances and managed ingestion." }}
+  {{- else }}
+  replicas:  {{ .Values.replicaCount }}
+  {{- end }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
@@ -19,6 +26,9 @@ spec:
       labels:
         {{- include "datahub-gms.selectorLabels" . | nindent 8 }}
         {{- range $key, $value := .Values.global.podLabels }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- range $key, $value := .Values.extraPodLabels }}
         {{ $key }}: {{ $value | quote }}
         {{- end }}
     spec:
@@ -39,6 +49,11 @@ spec:
           secret:
             defaultMode: 0444
             secretName: {{ .name }}
+        {{- end }}
+        {{- if .Values.global.elasticsearch.search.custom.enabled }}
+        - configMap:
+            name: {{ printf "%s-%s" .Release.Name "search-custom" }}
+          name: search-config
         {{- end }}
       {{- with .Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}
@@ -62,6 +77,11 @@ spec:
               containerPort: 4318
               protocol: TCP
           {{- end }}
+          {{- if gt .Values.replicaCount 1.0}}
+            - name: hazelcast
+              containerPort: 5701
+              protocol: TCP
+          {{- end}}
           livenessProbe:
             httpGet:
               path: /health
@@ -71,12 +91,30 @@ spec:
             failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
           readinessProbe:
             httpGet:
-              path: /health
+              path: /health/check/ready
               port: http
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
           env:
+            {{- if .Values.global.elasticsearch.search.custom.enabled }}
+            - name: ELASTICSEARCH_QUERY_CUSTOM_CONFIG_ENABLED
+              value: "true"
+            - name: ELASTICSEARCH_QUERY_CUSTOM_CONFIG_FILE
+              value: "/datahub/datahub-gms/resources/search/search_config.yml"
+            {{- end}}
+            {{- if gt .Values.replicaCount 1.0}}
+            - name: SEARCH_SERVICE_CACHE_IMPLEMENTATION
+              value: "hazelcast"
+            - name: SEARCH_SERVICE_HAZELCAST_SERVICE_NAME
+              value: {{ printf "%s-%s" .Release.Name "hazelcast-service" }}
+            {{- end}}
+            {{- if .Values.global.datahub.systemUpdate.enabled }}
+            - name: DATAHUB_UPGRADE_HISTORY_KAFKA_CONSUMER_GROUP_ID
+              value: {{ printf "%s-%s" .Release.Name "duhe-consumer-job-client-gms" }}
+            - name: DATAHUB_REVISION
+              value: {{ .Release.Revision | quote }}
+            {{- end }}
             {{- if .Values.global.datahub.monitoring.enablePrometheus }}
             - name: ENABLE_PROMETHEUS
               value: "true"
@@ -94,7 +132,15 @@ spec:
             - name: DATAHUB_ANALYTICS_ENABLED
               value: "{{ .Values.global.datahub_analytics_enabled }}"
             - name: EBEAN_DATASOURCE_USERNAME
-              value: {{ (.Values.sql).datasource.username | default .Values.global.sql.datasource.username | quote }}
+              {{- $usernameValue := (.Values.sql).datasource.username | default .Values.global.sql.datasource.username }}
+              {{- if and (kindIs "string" $usernameValue) $usernameValue }}
+              value: {{ $usernameValue | quote }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ (.Values.sql).datasource.username.secretRef | default .Values.global.sql.datasource.username.secretRef }}"
+                  key: "{{ (.Values.sql).datasource.username.secretKey | default .Values.global.sql.datasource.username.secretKey }}"
+              {{- end }}
             - name: EBEAN_DATASOURCE_PASSWORD
               {{- $passwordValue := (.Values.sql).datasource.password.value | default .Values.global.sql.datasource.password.value }}
               {{- if $passwordValue }}
@@ -113,9 +159,12 @@ spec:
               value: "{{ .Values.global.sql.datasource.driver }}"
             - name: KAFKA_BOOTSTRAP_SERVER
               value: "{{ .Values.global.kafka.bootstrap.server }}"
-            {{- with .Values.global.kafka.schemaregistry.url }}
+            {{- if eq .Values.global.kafka.schemaregistry.type "INTERNAL" }}
             - name: KAFKA_SCHEMAREGISTRY_URL
-              value: "{{ . }}"
+              value: {{ printf "http://localhost:%s/schema-registry/api/" .Values.global.datahub.gms.port }}
+            {{- else if eq .Values.global.kafka.schemaregistry.type "KAFKA" }}
+            - name: KAFKA_SCHEMAREGISTRY_URL
+              value: "{{ .Values.global.kafka.schemaregistry.url }}"
             {{- end }}
             {{- with .Values.global.kafka.schemaregistry.type }}
             - name: SCHEMA_REGISTRY_TYPE
@@ -143,10 +192,14 @@ spec:
             - name: ELASTICSEARCH_USERNAME
               value: {{ .username }}
             - name: ELASTICSEARCH_PASSWORD
+              {{- if .password.value }}
+              value: {{ .password.value | quote }}
+              {{- else }}
               valueFrom:
                 secretKeyRef:
                   name: "{{ .password.secretRef }}"
                   key: "{{ .password.secretKey }}"
+              {{- end }}
             {{- end }}
             {{- with .Values.global.elasticsearch.indexPrefix }}
             - name: INDEX_PREFIX
@@ -205,6 +258,8 @@ spec:
               value: {{ .metadata_change_log_timeseries_topic_name }}
             - name: PLATFORM_EVENT_TOPIC_NAME
               value: {{ .platform_event_topic_name }}
+            - name: DATAHUB_UPGRADE_HISTORY_TOPIC_NAME
+              value: {{ .datahub_upgrade_history_topic_name }}
             {{- end }}
             {{- if .Values.global.datahub.metadata_service_authentication.enabled }}
             - name: METADATA_SERVICE_AUTH_ENABLED
@@ -247,8 +302,44 @@ spec:
             - name: ENTITY_SERVICE_ENABLE_RETENTION
               value: "true"
             {{- end }}
+            - name: ELASTICSEARCH_QUERY_MAX_TERM_BUCKET_SIZE
+              value: {{ .Values.global.elasticsearch.search.maxTermBucketSize | quote }}
+            - name: ELASTICSEARCH_QUERY_EXACT_MATCH_EXCLUSIVE
+              value: {{ .Values.global.elasticsearch.search.exactMatch.exclusive | quote }}
+            - name: ELASTICSEARCH_QUERY_EXACT_MATCH_WITH_PREFIX
+              value: {{ .Values.global.elasticsearch.search.exactMatch.withPrefix | quote }}
+            - name: ELASTICSEARCH_QUERY_EXACT_MATCH_FACTOR
+              value: {{ .Values.global.elasticsearch.search.exactMatch.exactFactor | quote }}
+            - name: ELASTICSEARCH_QUERY_EXACT_MATCH_PREFIX_FACTOR
+              value: {{ .Values.global.elasticsearch.search.exactMatch.prefixFactor | quote }}
+            - name: ELASTICSEARCH_QUERY_EXACT_MATCH_CASE_FACTOR
+              value: {{ .Values.global.elasticsearch.search.exactMatch.caseSensitivityFactor | quote }}
+            - name: ELASTICSEARCH_QUERY_EXACT_MATCH_ENABLE_STRUCTURED
+              value: {{ .Values.global.elasticsearch.search.exactMatch.enableStructured | quote }}
+            - name: ELASTICSEARCH_SEARCH_GRAPH_TIMEOUT_SECONDS
+              value: {{ .Values.global.elasticsearch.search.graph.timeoutSeconds | quote }}
+            - name: ELASTICSEARCH_SEARCH_GRAPH_BATCH_SIZE
+              value: {{ .Values.global.elasticsearch.search.graph.batchSize | quote }}
+            - name: ELASTICSEARCH_SEARCH_GRAPH_MAX_RESULT
+              value: {{ .Values.global.elasticsearch.search.graph.maxResult | quote }}
             - name: SEARCH_SERVICE_ENABLE_CACHE
-              value: {{ .Values.global.datahub.enable_search_cache | quote }}
+              value: {{ .Values.global.datahub.cache.search.enabled | quote }}
+            {{- if .Values.global.datahub.cache.search.enabled }}
+            - name: CACHE_TTL_SECONDS
+              value: {{ .Values.global.datahub.cache.search.primary.ttlSeconds | quote }}
+            - name: CACHE_MAX_SIZE
+              value: {{ .Values.global.datahub.cache.search.primary.maxSize | quote }}
+            - name: CACHE_ENTITY_COUNTS_TTL_SECONDS
+              value: {{ .Values.global.datahub.cache.search.homepage.entityCounts.ttlSeconds | quote }}
+            {{- end }}
+            - name: LINEAGE_SEARCH_CACHE_ENABLED
+              value: {{ .Values.global.datahub.cache.search.lineage.enabled | quote }}
+            {{- if .Values.global.datahub.cache.search.lineage.enabled }}
+            - name: CACHE_SEARCH_LINEAGE_TTL_SECONDS
+              value: {{ .Values.global.datahub.cache.search.lineage.ttlSeconds | quote }}
+            - name: CACHE_SEARCH_LINEAGE_LIGHTNING_THRESHOLD
+              value: {{ .Values.global.datahub.cache.search.lineage.lightningThreshold | quote }}
+            {{- end }}
             {{- with .Values.global.elasticsearch.index.enableMappingsReindex }}
             - name: ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX
               value: {{ . | quote }}
@@ -257,6 +348,10 @@ spec:
             - name: ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX
               value: {{ . | quote }}
             {{- end }}
+            - name: ALWAYS_EMIT_CHANGE_LOG
+              value: {{ .Values.global.datahub.alwaysEmitChangeLog | quote }}
+            - name: GRAPH_SERVICE_DIFF_MODE_ENABLED
+              value: {{ .Values.global.datahub.enableGraphDiffMode | quote }}
           {{- with .Values.extraEnvs }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -265,11 +360,19 @@ spec:
             - name: datahub-certs-dir
               mountPath: {{ .path | default "/mnt/certs" }}
           {{- end }}
+          {{- if .Values.global.elasticsearch.search.custom.enabled }}
+            - name: search-config
+              mountPath: "/datahub/datahub-gms/resources/search"
+          {{- end }}
           {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+
+        {{- with .Values.extraSidecars }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
 
       {{- with .Values.nodeSelector }}
       nodeSelector:
